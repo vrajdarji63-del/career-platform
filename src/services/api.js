@@ -1,8 +1,13 @@
 import axios from 'axios';
 import { getActiveToken } from '../context/AuthContext.jsx';
 
-// Base API URL
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Base API URL (auto-normalizes to ensure it ends with /api without trailing slashes)
+let rawBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+rawBase = rawBase.trim().replace(/\/+$/, '');
+if (!rawBase.endsWith('/api')) {
+  rawBase += '/api';
+}
+const BASE_URL = rawBase;
 
 // ─── Role-specific storage keys (must match AuthContext) ─────────────────────
 const STORAGE_KEYS = {
