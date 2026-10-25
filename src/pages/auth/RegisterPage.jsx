@@ -93,8 +93,8 @@ function RegistrationForm({ onOTPSent }) {
     setErrors({});
     setLoading(true);
     try {
-      await authAPI.sendOTP(form.email.trim(), form.firstName.trim());
-      onOTPSent({ ...form, passportPhoto: photoFile });
+      const res = await authAPI.sendOTP(form.email.trim(), form.firstName.trim());
+      onOTPSent({ ...form, passportPhoto: photoFile, demoOtp: res.data?.demoOtp });
     } catch (err) {
       setServerError(err.response?.data?.message || 'Failed to send verification email. Please try again.');
     } finally {
@@ -399,7 +399,9 @@ function OTPVerification({ formData, onVerified, onBack }) {
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const [otp, setOtp]             = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(
+    formData?.demoOtp ? formData.demoOtp.split('') : ['', '', '', '', '', '']
+  );
   const [error, setError]         = useState('');
   const [loading, setLoading]     = useState(false);
   const [resending, setResending] = useState(false);
@@ -470,7 +472,10 @@ function OTPVerification({ formData, onVerified, onBack }) {
     setError('');
     setOtp(['', '', '', '', '', '']);
     try {
-      await authAPI.sendOTP(formData.email, formData.firstName);
+      const res = await authAPI.sendOTP(formData.email, formData.firstName);
+      if (res.data?.demoOtp) {
+        setOtp(res.data.demoOtp.split(''));
+      }
       setCountdown(60);
       inputRefs.current[0]?.focus();
     } catch (err) {
@@ -494,6 +499,16 @@ function OTPVerification({ formData, onVerified, onBack }) {
           <strong style={{ color: '#4f46e5' }}>{formData.email}</strong>
         </p>
       </div>
+
+      {formData?.demoOtp && (
+        <div style={{
+          background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e40af',
+          borderRadius: 10, padding: '10px 14px', fontSize: '0.84rem',
+          textAlign: 'center', width: '100%', boxSizing: 'border-box'
+        }}>
+          💡 Verification code: <strong style={{ letterSpacing: '2px', fontSize: '1rem' }}>{formData.demoOtp}</strong> (Auto-filled)
+        </div>
+      )}
 
       {/* OTP inputs */}
       <div style={{ display: 'flex', gap: 10 }} onPaste={handlePaste}>

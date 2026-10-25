@@ -23,7 +23,7 @@ function getSessionType() {
 const api = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 10000,
+  timeout: 25000,
 });
 
 // ─── Request Interceptor: attach JWT token based on current route context ────
